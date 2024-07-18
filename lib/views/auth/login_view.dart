@@ -1,3 +1,4 @@
+import 'package:chatdo/common/widgets/custom_auth_button.dart';
 import 'package:chatdo/services/alert_servivces.dart';
 import 'package:chatdo/services/auth_services.dart';
 import 'package:chatdo/services/database_services.dart';
@@ -68,6 +69,11 @@ class _LoginViewState extends State<LoginView> {
             //form
             _buildLoginForm(),
 
+            CustomAuthButton(
+              onnTap: _loginWithBiometrics,
+              authText: 'Sign In With Biometrics instead',
+            ),
+
             //button to go to sign up
             CustomNavButtons(
               onTap: () => navService.pushNamed('/register'),
@@ -125,13 +131,7 @@ class _LoginViewState extends State<LoginView> {
             ),
 
             //sign in button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _loginUser,
-                child: const Text('Login'),
-              ),
-            )
+            CustomAuthButton(onnTap: _loginUser, authText: 'Login')
           ],
         ),
       ),
@@ -164,6 +164,19 @@ class _LoginViewState extends State<LoginView> {
       alertService.closeLoader();
       Logger().i('$error $e');
       alertService.showToast(text: 'Something went wrong, check credentails');
+    }
+  }
+
+  void _loginWithBiometrics() async {
+    try {
+      final bool authenticated = await authService.signInWithBiometrics();
+      if (authenticated) {
+        alertService.showToast(text: 'Logged in successfully');
+        navService.pushNamedAndReplace('/home');
+      }
+    } catch (e) {
+      alertService.showToast(text: 'An error occured with biometrics login');
+      Logger().i("$error : $e");
     }
   }
 }
